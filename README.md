@@ -8,7 +8,7 @@ Abra [`index.html`](index.html) em um navegador. Não precisa de servidor, depen
 
 O arquivo [`config.toml`](config.toml) traz a configuração padrão usada pelo editor. Para aplicá-la, incorpore a tabela `[tui]` ao seu `~/.codex/config.toml` ou ao caminho definido por `CODEX_HOME`, preservando as outras opções que já existirem. Reinicie o Codex para carregar a alteração.
 
-A ordem padrão prioriza modelo e esforço, percentual de contexto restante e branch; o diretório vem por último para continuar visível em terminais estreitos.
+A ordem padrão segue diretório, branch, modelo e percentual de contexto restante.
 
 ## Itens disponíveis
 
@@ -26,7 +26,7 @@ O Codex aceita identificadores nativos em `tui.status_line`; não oferece um ren
 
 ```toml
 [tui]
-status_line = ["model-with-reasoning", "context-remaining", "git-branch", "current-dir"]
+status_line = ["current-dir", "git-branch", "model", "context-remaining"]
 terminal_title = ["spinner", "project"]
 ```
 
