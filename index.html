@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111318" />
+    <title>Codex Statusline Studio</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: #111318;
+        color: #e7e9ee;
+        font-synthesis: none;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse at 15% 0%, #1b2837 0, #111318 50rem); }
+      button, select { font: inherit; }
+      button { cursor: pointer; }
+      .shell { max-width: 1100px; margin: 0 auto; padding: 56px 24px 80px; }
+      .eyebrow { color: #93a4bc; font-size: 12px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+      h1 { margin: 12px 0 10px; font-size: clamp(32px, 5vw, 48px); letter-spacing: -.04em; }
+      .intro { max-width: 680px; color: #aab2c0; line-height: 1.65; }
+      .layout { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(300px, .8fr); gap: 20px; margin-top: 32px; }
+      .panel { border: 1px solid #303642; border-radius: 16px; background: #191c23ee; padding: 22px; box-shadow: 0 18px 48px #0003; }
+      .panel h2 { margin: 0 0 5px; font-size: 18px; }
+      .muted { color: #929baa; font-size: 13px; line-height: 1.55; }
+      .presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 22px; }
+      .preset, .action { border: 1px solid #414959; border-radius: 9px; background: #222731; color: #dbe4f0; padding: 9px 12px; }
+      .preset:hover, .action:hover { border-color: #65b3ff; background: #263448; }
+      .catalog { display: grid; gap: 9px; }
+      .choice { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #343b48; border-radius: 10px; background: #1d2129; }
+      .choice input { width: 17px; height: 17px; accent-color: #64b2ff; }
+      .choice-copy { flex: 1; min-width: 0; }
+      .choice-copy strong { display: block; font-size: 14px; }
+      code { color: #91c9ff; font-size: 12px; }
+      .order { display: flex; gap: 5px; }
+      .order button { width: 30px; height: 30px; border: 1px solid #3c4552; border-radius: 7px; color: #dbe4f0; background: #262b34; }
+      .order button:disabled { opacity: .35; cursor: default; }
+      .preview { margin-top: 18px; padding: 18px; overflow-x: auto; border: 1px solid #333a47; border-radius: 11px; background: #0d0f13; color: #d7e2ef; font: 13px/1.7 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: nowrap; }
+      .preview span + span::before { content: "  ·  "; color: #59677a; }
+      .preview .value { color: #99c6f2; }
+      .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+      .action.primary { border-color: #397dba; background: #205b8b; color: white; }
+      .notice { margin-top: 17px; padding: 12px 13px; border-left: 3px solid #d8a850; border-radius: 4px; background: #26231c; color: #d6c49d; font-size: 12px; line-height: 1.55; }
+      pre { margin: 16px 0 0; padding: 15px; min-height: 106px; overflow-x: auto; border: 1px solid #343b48; border-radius: 10px; background: #101217; color: #c5d4e5; font: 12px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+      .title-items { margin-top: 22px; padding-top: 18px; border-top: 1px solid #303642; }
+      .title-items label { display: flex; align-items: center; gap: 9px; margin-top: 10px; color: #b6bfcc; font-size: 13px; }
+      .title-items input { accent-color: #64b2ff; }
+      .status { min-height: 20px; margin-top: 9px; color: #9dc6ee; font-size: 12px; }
+      @media (max-width: 760px) { .shell { padding: 34px 16px 56px; } .layout { grid-template-columns: 1fr; } }
+      @media (prefers-reduced-motion: no-preference) { .panel { animation: arrive .35s ease-out both; } @keyframes arrive { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } } }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <div class="eyebrow">Editor local · sem dependências</div>
+      <h1>Codex Statusline Studio</h1>
+      <p class="intro">Monte a barra de status com os itens nativos documentados pelo Codex. Reordene, veja uma prévia ilustrativa e gere TOML para revisar antes de aplicar.</p>
+
+      <div class="layout">
+        <section class="panel" aria-labelledby="catalog-title">
+          <h2 id="catalog-title">Itens da barra</h2>
+          <p class="muted">Escolha os itens e use as setas para mudar a ordem.</p>
+          <div class="presets" aria-label="Predefinições">
+            <button class="preset" data-preset="default">Padrão</button>
+            <button class="preset" data-preset="developer">Desenvolvimento</button>
+            <button class="preset" data-preset="review">Revisão</button>
+            <button class="preset" data-preset="compact">Compacta</button>
+          </div>
+          <div class="catalog" id="catalog"></div>
+          <div class="title-items">
+            <strong>Título da janela</strong>
+            <p class="muted">Itens nativos para `tui.terminal_title`.</p>
+            <label><input type="checkbox" value="spinner" checked /> `spinner`</label>
+            <label><input type="checkbox" value="project" checked /> `project`</label>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="preview-title">
+          <h2 id="preview-title">Prévia</h2>
+          <p class="muted">Valores de exemplo para visualizar a ordem; o TUI mostra dados reais.</p>
+          <div class="preview" id="preview" aria-live="polite"></div>
+          <div class="actions">
+            <button class="action primary" id="copy">Copiar TOML</button>
+            <button class="action" id="download">Baixar config.toml</button>
+          </div>
+          <div class="status" id="status" role="status"></div>
+          <pre id="toml"></pre>
+          <div class="notice">A barra do Codex aceita identificadores nativos, não um renderer customizado. Esta prévia não representa pixel a pixel o TUI nem adiciona métricas de custo, tokens ou gateway.</div>
+        </section>
+      </div>
+    </main>
+    <script>
+      const ITEMS = [
+        { id: "model-with-reasoning", label: "Modelo e raciocínio", example: "GPT-6.1 Sol · high" },
+        { id: "context-remaining", label: "Contexto restante", example: "Context 72% left" },
+        { id: "current-dir", label: "Diretório atual", example: "~/projects/app" },
+        { id: "model", label: "Modelo", example: "GPT-6.1 Sol" },
+        { id: "git-branch", label: "Branch Git", example: "feat/codex-config*" },
+      ];
+      const PRESETS = {
+        default: ["model-with-reasoning", "context-remaining", "current-dir"],
+        developer: ["model-with-reasoning", "context-remaining", "current-dir", "git-branch"],
+        review: ["model", "context-remaining", "git-branch"],
+        compact: ["model-with-reasoning", "git-branch"],
+      };
+      let selected = [...PRESETS.developer];
+      const catalog = document.querySelector("#catalog");
+
+      function render() {
+        catalog.replaceChildren();
+        ITEMS.forEach((item) => {
+          const row = document.createElement("div");
+          row.className = "choice";
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = selected.includes(item.id);
+          checkbox.setAttribute("aria-label", `Incluir ${item.label}`);
+          checkbox.addEventListener("change", () => {
+            selected = checkbox.checked ? [...selected, item.id] : selected.filter((id) => id !== item.id);
+            render();
+          });
+          const copy = document.createElement("div");
+          copy.className = "choice-copy";
+          const label = document.createElement("strong");
+          label.textContent = item.label;
+          const id = document.createElement("code");
+          id.textContent = item.id;
+          copy.append(label, id);
+          const order = document.createElement("div");
+          order.className = "order";
+          const position = selected.indexOf(item.id);
+          [
+            ["↑", position - 1, position <= 0, "Mover para cima"],
+            ["↓", position + 1, position < 0 || position >= selected.length - 1, "Mover para baixo"],
+          ].forEach(([symbol, target, disabled, title]) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = symbol;
+            button.title = `${title}: ${item.label}`;
+            button.setAttribute("aria-label", button.title);
+            button.disabled = disabled;
+            button.addEventListener("click", () => {
+              const next = [...selected];
+              [next[position], next[target]] = [next[target], next[position]];
+              selected = next;
+              render();
+            });
+            order.append(button);
+          });
+          row.append(checkbox, copy, order);
+          catalog.append(row);
+        });
+        renderPreview();
+      }
+
+      function buildToml() {
+        const titleItems = [...document.querySelectorAll(".title-items input:checked")].map((input) => input.value);
+        const quote = (items) => `[${items.map((item) => `"${item}"`).join(", ")}]`;
+        return `[tui]\nstatus_line = ${quote(selected)}\nterminal_title = ${quote(titleItems)}\n`;
+      }
+
+      function renderPreview() {
+        const preview = document.querySelector("#preview");
+        preview.replaceChildren();
+        const values = selected.map((id) => ITEMS.find((item) => item.id === id)).filter(Boolean);
+        if (!values.length) {
+          preview.textContent = "Statusline oculta";
+        } else {
+          values.forEach((item) => {
+            const span = document.createElement("span");
+            span.className = "value";
+            span.textContent = item.example;
+            preview.append(span);
+          });
+        }
+        document.querySelector("#toml").textContent = buildToml();
+      }
+
+      document.querySelectorAll(".preset").forEach((button) => {
+        button.addEventListener("click", () => {
+          selected = [...PRESETS[button.dataset.preset]];
+          render();
+        });
+      });
+      document.querySelectorAll(".title-items input").forEach((input) => input.addEventListener("change", renderPreview));
+      document.querySelector("#copy").addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(buildToml());
+          document.querySelector("#status").textContent = "TOML copiado.";
+        } catch {
+          document.querySelector("#status").textContent = "Não foi possível acessar a área de transferência; copie o trecho exibido.";
+        }
+      });
+      document.querySelector("#download").addEventListener("click", () => {
+        const blob = new Blob([buildToml()], { type: "text/plain;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "codex-statusline.toml";
+        link.click();
+        URL.revokeObjectURL(url);
+        document.querySelector("#status").textContent = "Arquivo baixado. Mescle a tabela [tui] à sua configuração existente.";
+      });
+      render();
+    </script>
+  </body>
+</html>
