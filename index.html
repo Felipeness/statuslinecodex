@@ -28,7 +28,7 @@
       .presets { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 22px; }
       .preset, .action { border: 1px solid #414959; border-radius: 9px; background: #222731; color: #dbe4f0; padding: 9px 12px; }
       .preset:hover, .action:hover { border-color: #65b3ff; background: #263448; }
-      .catalog { display: grid; gap: 9px; }
+      .catalog { display: grid; gap: 9px; max-height: 60vh; overflow-y: auto; padding-right: 4px; }
       .choice { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid #343b48; border-radius: 10px; background: #1d2129; }
       .choice input { width: 17px; height: 17px; accent-color: #64b2ff; }
       .choice-copy { flex: 1; min-width: 0; }
@@ -87,23 +87,49 @@
           </div>
           <div class="status" id="status" role="status"></div>
           <pre id="toml"></pre>
-          <div class="notice">A barra do Codex aceita identificadores nativos, não um renderer customizado. Esta prévia não representa pixel a pixel o TUI nem adiciona métricas de custo, tokens ou gateway.</div>
+          <div class="notice">A barra do Codex aceita identificadores nativos, não um renderer customizado. Custo em dólar (`estimated-thread-cost`) só aparece em workspace Enterprise; no Plus/Pro o gasto real é a cota, então use `five-hour-limit` e `weekly-limit`. Itens sem dado ficam ocultos no TUI.</div>
         </section>
       </div>
     </main>
     <script>
       const ITEMS = [
-        { id: "model-with-reasoning", label: "Modelo e raciocínio", example: "GPT-6.1 Sol · high" },
-        { id: "context-remaining", label: "Contexto restante", example: "Context 72% left" },
         { id: "current-dir", label: "Diretório atual", example: "~/projects/app" },
-        { id: "model", label: "Modelo", example: "GPT-6.1 Sol" },
+        { id: "project-name", label: "Projeto", example: "app" },
         { id: "git-branch", label: "Branch Git", example: "feat/codex-config*" },
+        { id: "pull-request-number", label: "PR da branch", example: "#42" },
+        { id: "branch-changes", label: "Mudanças da branch", example: "+120 −8" },
+        { id: "model", label: "Modelo", example: "GPT-6.1 Sol" },
+        { id: "model-with-reasoning", label: "Modelo e raciocínio", example: "GPT-6.1 Sol · high" },
+        { id: "reasoning", label: "Raciocínio", example: "high" },
+        { id: "fast-mode", label: "Fast mode", example: "fast" },
+        { id: "context-remaining", label: "Contexto restante", example: "Context 72% left" },
+        { id: "context-used", label: "Contexto usado", example: "Context 28% used" },
+        { id: "context-window-size", label: "Janela de contexto", example: "400K window" },
+        { id: "used-tokens", label: "Tokens da sessão", example: "182K used" },
+        { id: "total-input-tokens", label: "Tokens de entrada", example: "170K in" },
+        { id: "total-output-tokens", label: "Tokens de saída", example: "12K out" },
+        { id: "five-hour-limit", label: "Limite de 5h", example: "5h 64% left" },
+        { id: "weekly-limit", label: "Limite semanal", example: "weekly 81% left" },
+        { id: "estimated-thread-cost", label: "Custo da thread (Enterprise)", example: "$1.84" },
+        { id: "thread-credits", label: "Créditos da thread (Enterprise)", example: "46 credits" },
+        { id: "run-state", label: "Estado", example: "Working" },
+        { id: "task-progress", label: "Progresso do plano", example: "3/5 tasks" },
+        { id: "permissions", label: "Permissões", example: "workspace-write" },
+        { id: "approval-mode", label: "Modo de aprovação", example: "on-request" },
+        { id: "thread-title", label: "Título da thread", example: "fix statusline cost" },
+        { id: "thread-name", label: "Nome da thread", example: "statusline" },
+        { id: "thread-id", label: "ID da thread", example: "019a…c3f2" },
+        { id: "hostname", label: "Hostname", example: "felip-pc" },
+        { id: "codex-version", label: "Versão do Codex", example: "v0.60.0" },
+        { id: "raw-output", label: "Raw scrollback", example: "raw" },
+        { id: "daybreak", label: "Daybreak", example: "daybreak" },
+        { id: "workspace-headline", label: "Aviso do workspace", example: "Maintenance 22h" },
       ];
       const PRESETS = {
-        default: ["current-dir", "git-branch", "model", "context-remaining"],
-        developer: ["current-dir", "git-branch", "model", "context-remaining"],
-        review: ["model", "context-remaining", "git-branch"],
-        compact: ["model-with-reasoning", "git-branch"],
+        default: ["current-dir", "git-branch", "model-with-reasoning", "context-remaining", "used-tokens", "five-hour-limit", "weekly-limit", "estimated-thread-cost"],
+        developer: ["current-dir", "git-branch", "branch-changes", "model-with-reasoning", "context-remaining", "used-tokens", "five-hour-limit", "weekly-limit"],
+        review: ["git-branch", "pull-request-number", "branch-changes", "model", "context-remaining"],
+        compact: ["model-with-reasoning", "context-remaining", "five-hour-limit"],
       };
       let selected = [...PRESETS.developer];
       const catalog = document.querySelector("#catalog");
