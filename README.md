@@ -18,7 +18,17 @@ O Codex não aceita renderer customizado em `tui.status_line`, só identificador
 - `five-hour-limit` e `weekly-limit`: quanto resta da cota no Plus/Pro. Nesses planos é a métrica de gasto que importa, já que não há fatura por token.
 - `used-tokens`, `total-input-tokens` e `total-output-tokens`: volume de tokens da sessão.
 
-Histórico, gasto do dia/mês e gateway continuam exclusivos do `claude-statusline`.
+### Gasto por dia, mês e sessão
+
+A statusline não roda script, então o gasto acumulado fica fora do TUI. O [`ccusage`](https://github.com/ryoppippi/ccusage) lê os arquivos de sessão do Codex (`~/.codex/sessions` ou `CODEX_HOME`) e calcula o custo com o preço público de cada modelo:
+
+```bash
+npx ccusage@latest codex daily     # por dia
+npx ccusage@latest codex monthly   # por mês
+npx ccusage@latest codex session   # por sessão
+```
+
+No Plus/Pro o valor é o que essas chamadas custariam via API, não uma cobrança real. Serve para comparar uso, e a cota continua sendo `five-hour-limit` e `weekly-limit`.
 
 ## Itens disponíveis
 
