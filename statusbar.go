@@ -96,7 +96,11 @@ func RenderBar(session, today SessionStats) string {
 	// turnos
 	if session.Turns > 0 {
 		b.WriteString(sep())
-		b.WriteString(dim + fmt.Sprintf("%d turnos", session.Turns) + reset)
+		turno := "turnos"
+		if session.Turns == 1 {
+			turno = "turno"
+		}
+		fmt.Fprintf(&b, "%s%d %s%s", dim, session.Turns, turno, reset)
 	}
 
 	return b.String()
